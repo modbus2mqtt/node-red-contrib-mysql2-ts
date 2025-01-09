@@ -128,26 +128,66 @@ module.exports = (RED) => {
         return;
       }
 
-      const isAnObject = value => value === Object(value) && !Array.isArray(value);
+      const isAnObject = (value) => value === Object(value);
       if (msg.payload !== undefined && !isAnObject(msg.payload)) {
-        this.error('msg.payload should be an object containing the query arguments.');
+        this.error(
+          "msg.payload should be an object or an array containing the query arguments."
+        );
         return;
       }
-
-      try {
-        const [ result ] = await this.serverConfig
-          .query(
-            msg.topic,
-            msg.payload
-          );
-          this.setState('queryDone');
-        msg.payload = result;
-        this.send(msg);
-      }
-      catch (error) {
-        this.error(error, msg);
-        this.setState('error', error.toString());
-      }
+      let values = [];
+      if (!(msg.payload != undefined && Array.isArray(msg.payload)))
+        values = [msg.payload];
+      else values = msg.payload;
+      let thisNode = this;
+      this.serverConfig.pool.getConnection(function (_err, connection) {
+        connection.beginTransaction(function (err) {
+          if (err) {
+            connection.rollback(function () {
+              connection.release();
+            });
+          }
+          let result = [];
+          let promisses = [];
+          msg.payload = values.forEach((value) => {
+            promisses.push(
+              new Promise(function (resolve, reject) {
+                connection.query(
+                  msg.topic,
+                  value,
+                  function (error, results, _fields) {
+                    if (error)
+                      reject( error)
+                    else resolve(results);
+                  }
+                );
+              })
+            );
+          });
+          Promise.all(promisses).then((results) => {
+            connection
+              .commit(function (error) {
+                if (error) {
+                  connection.rollback(function () {
+                    connection.release();
+                    //Failure
+                    thisNode.error(error);
+                    thisNode.setState("error", error.toString());
+                  });
+                } else {
+                  connection.release();
+                  msg.payload = results;
+                  thisNode.setState("queryDone");
+                  thisNode.send(msg);
+                }
+              })
+              
+          }).catch((error) => {
+            thisNode.error(error);
+            thisNode.setState("error", error.toString());
+          });;
+        });
+      });
     });
 
     this.on('close', async () => {
