@@ -147,7 +147,6 @@ module.exports = (RED) => {
               connection.release();
             });
           }
-          let result = [];
           let promisses = [];
           msg.payload = values.forEach((value) => {
             promisses.push(
