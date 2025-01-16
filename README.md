@@ -35,7 +35,19 @@ msg.topic = 'SELECT * FROM `users` WHERE `name` = :name AND `age` > :age;';
 msg.payload = { name: 'Adrien', age: 30 };
 return msg;
 ```
+If you have multiple arguments, put them in an array of objects in the `payload` variable.
+You will get the result in the `payload` output variable.
 
+Example:
+
+```javascript
+msg.topic = 'INSERT INTO `users` (`name`,  `age`) VALUES( :name, :age) ;';
+msg.payload = [
+  { name: 'Adrien', age: 30 },
+  { name: 'Maria', age: 62 }
+]
+return msg;
+```
 > Avoid SQL injections!!
 >
 > Do not NEVER EVER put variables content in `topic` directly!
