@@ -140,52 +140,55 @@ module.exports = (RED) => {
         values = [msg.payload];
       else values = msg.payload;
       let thisNode = this;
-      this.serverConfig.pool.getConnection(function (_err, connection) {
-        connection.beginTransaction(function (err) {
+      this.serverConfig.pool.getConnection(function (err, connection) {
           if (err) {
-            connection.rollback(function () {
-              connection.release();
-            });
-          }
-          let promisses = [];
-          msg.payload = values.forEach((value) => {
-            promisses.push(
-              new Promise(function (resolve, reject) {
-                connection.query(
-                  msg.topic,
-                  value,
-                  function (error, results, _fields) {
-                    if (error)
-                      reject( error)
-                    else resolve(results);
-                  }
-                );
-              })
-            );
-          });
-          Promise.all(promisses).then((results) => {
-            connection
-              .commit(function (error) {
-                if (error) {
-                  connection.rollback(function () {
-                    connection.release();
-                    //Failure
-                    thisNode.error(error);
-                    thisNode.setState("error", error.toString());
-                  });
-                } else {
+              if(connection)
+                connection.rollback(function () {
                   connection.release();
-                  msg.payload = results;
-                  thisNode.setState("queryDone");
-                  thisNode.send(msg);
-                }
-              })
+                });
+              return
+          }
+          connection.beginTransaction(function (err) {
+            let promisses = [];
+            msg.payload = values.forEach((value) => {
+              promisses.push(
+                new Promise(function (resolve, reject) {
+                  connection.query(
+                    msg.topic,
+                    value,
+                      
+                    function (error, results, _fields) {
+                      if (error)
+                        reject( error)
+                      else resolve(results);
+                    }
+                  );
+                })
+              );
+            });
+            Promise.all(promisses).then((results) => {
+             connection
+                .commit(function (error) {
+                  if (error) {
+                    connection.rollback(function () {
+                      connection.release();
+                      //Failure
+                      thisNode.error(error);
+                      thisNode.setState("error", error.toString());
+                    });
+                  } else {
+                    connection.release();
+                    msg.payload = results;
+                    thisNode.setState("queryDone");
+                    thisNode.send(msg);
+                  }
+                })
               
-          }).catch((error) => {
-            thisNode.error(error);
-            thisNode.setState("error", error.toString());
-          });;
-        });
+            }).catch((error) => {
+              thisNode.error(error);
+              thisNode.setState("error", error.toString());
+            });;
+          });
       });
     });
 
