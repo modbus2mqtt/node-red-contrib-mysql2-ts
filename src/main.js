@@ -177,6 +177,7 @@ module.exports = (RED) => {
                       thisNode.setState("error", error.toString());
                     });
                   } else {
+                    connection.commit();
                     connection.release();
                     msg.payload = results;
                     thisNode.setState("queryDone");
@@ -185,6 +186,9 @@ module.exports = (RED) => {
                 })
               
             }).catch((error) => {
+              connection.rollback(function () {
+                connection.release();
+              });
               thisNode.error(error);
               thisNode.setState("error", error.toString());
             });;
@@ -193,6 +197,8 @@ module.exports = (RED) => {
     });
 
     this.on('close', async () => {
+
+  
       this.serverConfig.removeAllListeners();
       this.setState();
     });
