@@ -91,7 +91,7 @@ module.exports = (RED) => {
     }
   );
 
-
+  
 
   function MysqlDBNodeIn(config) {
     RED.nodes.createNode(this, config);
@@ -115,7 +115,9 @@ module.exports = (RED) => {
       else if (code === 'queryDone') {
         this.status({ fill: 'blue', shape: 'dot', text: 'query done' });
       }
-      else {
+      else if (code === 'singleQueryDone') {
+        this.status({ fill: 'blue', shape: 'dot', text: 'single query done' });
+      }{
         this.status({});
       }
     };
@@ -135,12 +137,42 @@ module.exports = (RED) => {
         );
         return;
       }
-      let values = [];
-      if (!(msg.payload != undefined && Array.isArray(msg.payload)))
-        values = [msg.payload];
-      else values = msg.payload;
-      let thisNode = this;
-      this.serverConfig.pool.getConnection(function (err, connection) {
+      if ((msg.payload != undefined ))
+        if( !Array.isArray(msg.payload)){
+        try {
+          const [ result ] = await this.serverConfig
+            .query(
+              msg.topic,
+              msg.payload
+            );
+          this.setState('singleQueryDone');
+          msg.payload = result;
+          this.send(msg);
+        }
+        catch (error) {
+          this.error(error, msg);
+          this.setState('error', error.toString());
+        }
+      }
+      else 
+        processArray(msg, this);
+      else{
+          //this.error(error, "No payload passed");
+          this.setState('error', "Error no payload");
+        }
+    });
+
+    this.on('close', async () => {  
+      this.serverConfig.removeAllListeners();
+      this.setState();
+    });
+
+    this.serverConfig.connect();
+  }
+  function processArray( msg,thisNode){
+     let values = [];
+     values =msg.payload;
+      thisNode.serverConfig.pool.getConnection(function (err, connection) {
           if (err) {
               if(connection)
                 connection.rollback(function () {
@@ -194,16 +226,6 @@ module.exports = (RED) => {
             });;
           });
       });
-    });
-
-    this.on('close', async () => {
-
-  
-      this.serverConfig.removeAllListeners();
-      this.setState();
-    });
-
-    this.serverConfig.connect();
   }
   RED.nodes.registerType('Stackhero-MySQL', MysqlDBNodeIn);
 };
