@@ -1,0 +1,62 @@
+[
+  {
+    "id": "26f21fdc017693d6",
+    "type": "tab",
+    "label": "Flow 1",
+    "disabled": false,
+    "info": "",
+    "env": []
+  },
+  {
+    "id": "17ef50671370b673",
+    "type": "MySQL-Query",
+    "z": "26f21fdc017693d6",
+    "server": "46971188902b24ca",
+    "name": "Query",
+    "x": 690,
+    "y": 260,
+    "wires": [["15f8ac5b0d916833"]]
+  },
+  {
+    "id": "587c73602ad08b7c",
+    "type": "inject",
+    "z": "26f21fdc017693d6",
+    "name": "",
+    "props": [{ "p": "payload" }, { "p": "topic", "vt": "str" }],
+    "repeat": "",
+    "crontab": "",
+    "once": false,
+    "onceDelay": 0.1,
+    "topic": "select version();",
+    "payload": "{}",
+    "payloadType": "json",
+    "x": 490,
+    "y": 260,
+    "wires": [["17ef50671370b673"]]
+  },
+  {
+    "id": "15f8ac5b0d916833",
+    "type": "debug",
+    "z": "26f21fdc017693d6",
+    "name": "debug 3",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "false",
+    "statusVal": "",
+    "statusType": "auto",
+    "x": 840,
+    "y": 260,
+    "wires": []
+  },
+  {
+    "id": "46971188902b24ca",
+    "type": "MySQL-Server",
+    "name": "dynamic_prices",
+    "host": "homeassistantpve1.lan",
+    "port": "3306",
+    "tls": false,
+    "database": "dynamic_prices"
+  }
+]
