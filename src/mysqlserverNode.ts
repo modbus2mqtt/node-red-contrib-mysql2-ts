@@ -17,7 +17,7 @@ import { Node, NodeAPI,NodeDef} from "node-red";
    pool: Pool|null = null ;
    pingTimeout: NodeJS.Timeout|null = null;
    credentials: { user: string; password: string; } = { user: '', password: '' };
-   stateMonitor: IstateMonitor;
+   stateMonitors: IstateMonitor[] = [] ;
 
     query(sql: string, values?: any):Promise<any>{
         if( this.pool)
@@ -31,17 +31,33 @@ import { Node, NodeAPI,NodeDef} from "node-red";
       if(timeout!= undefined)
         this.pingTimeout = setTimeout(this.ping.bind(this), timeout * 1000);
     };
-    setStateMonitor(monitor:IstateMonitor):void{
-      this.stateMonitor = monitor;
+    addStateMonitor(monitor:IstateMonitor):void{
+      this.stateMonitors.push( monitor);
+    }
+    removeStateMonitor(monitor:IstateMonitor):void{
+      const index = this.stateMonitors.indexOf(monitor);
+      if (index > -1) {
+        this.stateMonitors.splice(index, 1);
+      }
+    }
+    setState(code:string, info?:string):void {
+      this.stateMonitors.forEach( monitor => {
+        monitor.setState(code, info);
+      });
+    }; 
+    resetState():void {
+      this.stateMonitors.forEach( monitor => {
+        monitor.resetState();
+      });
     }
     ping():Promise<void>{
         return  new Promise( (resolve, reject) => {
         this.query('SELECT version();').then( values => {
-          this.stateMonitor?.setState( 'connected');
+          this.setState( 'connected');
           this.pingReset(); 
             resolve();
         }).catch( error => {
-          this.stateMonitor?.setState( 'error',  error.toString());
+          this.setState( 'error',  "Ping: " + error.toString());
           this.pingReset(5);
         });
         });
@@ -49,7 +65,7 @@ import { Node, NodeAPI,NodeDef} from "node-red";
 
   connect():Promise<void> {
     return new Promise( (resolve, reject) => {
-      this.stateMonitor?.setState('state', 'connecting');
+      this. setState('state', 'connecting');
 
       if (this.pool) {
         resolve();

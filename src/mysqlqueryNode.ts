@@ -44,7 +44,7 @@ import { IstateMonitor, MySQLServerNode, MySQLServerNodeDef } from './mysqlserve
   init():void{    
         this.red().log('Constructor called');
         
-        this.serverConfig?.setStateMonitor(this);
+        this.serverConfig?.addStateMonitor(this);
     
         this.red().on('input',  async ( msg:any) => {
       if (typeof(msg.topic) !== 'string' || !msg.topic) {
@@ -82,6 +82,7 @@ import { IstateMonitor, MySQLServerNode, MySQLServerNodeDef } from './mysqlserve
     });
     this.red().on('close', () => {  
       this.serverConfig.red().removeAllListeners();
+      this.serverConfig.removeStateMonitor(this);
       this.resetState();
     });
 
