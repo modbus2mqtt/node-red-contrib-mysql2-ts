@@ -7,12 +7,17 @@ import { Node, NodeAPI,NodeDef} from "node-red";
     database: string;
     tls: boolean;
   } 
+ export interface IstateMonitor{
+  setState(code:string, info?:string):void;
+  resetState():void;
+}
  export interface MySQLServerNodeDef extends NodeDef, MySQLServerNodeOptions {}
  interface MySQLServerNodeCredentials { user: string; password: string; }
  export class MySQLServerNode  {
    pool: Pool|null = null ;
    pingTimeout: NodeJS.Timeout|null = null;
    credentials: { user: string; password: string; } = { user: '', password: '' };
+   stateMonitor: IstateMonitor;
 
     query(sql: string, values?: any):Promise<any>{
         if( this.pool)
@@ -26,14 +31,17 @@ import { Node, NodeAPI,NodeDef} from "node-red";
       if(timeout!= undefined)
         this.pingTimeout = setTimeout(this.ping.bind(this), timeout * 1000);
     };
+    setStateMonitor(monitor:IstateMonitor):void{
+      this.stateMonitor = monitor;
+    }
     ping():Promise<void>{
         return  new Promise( (resolve, reject) => {
         this.query('SELECT version();').then( values => {
-          this.red().emit('state', 'connected');
+          this.stateMonitor?.setState( 'connected');
           this.pingReset(); 
             resolve();
         }).catch( error => {
-          this.red().emit('state', 'error',  error.toString());
+          this.stateMonitor?.setState( 'error',  error.toString());
           this.pingReset(5);
         });
         });
@@ -41,7 +49,7 @@ import { Node, NodeAPI,NodeDef} from "node-red";
 
   connect():Promise<void> {
     return new Promise( (resolve, reject) => {
-      this.red().emit('state', 'connecting');
+      this.stateMonitor?.setState('state', 'connecting');
 
       if (this.pool) {
         resolve();
@@ -81,6 +89,7 @@ import { Node, NodeAPI,NodeDef} from "node-red";
         (node as any).mySQLServerNode = this;
     }
    init():void{   
+        this.credentials = this.red().credentials;
         this.red().log('Constructor called');
         this.red().on('close',  (done:()=>void) => {
                 if (this.pingTimeout) {
@@ -106,6 +115,7 @@ export default function(RED:NodeAPI){
   function mySQLServerNodeCreate(this:Node<MySQLServerNodeCredentials>, config:MySQLServerNodeDef) {
     let thisNode:MySQLServerNode= new MySQLServerNode(this,config)
     RED.nodes.createNode(this, config);
+ 
     thisNode.init()
   }
   RED.nodes.registerType(

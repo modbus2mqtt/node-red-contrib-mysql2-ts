@@ -1,6 +1,6 @@
 import mysql,{FieldPacket, OkPacket, Pool, ResultSetHeader, RowDataPacket} from 'mysql2/promise';
 import { Node, NodeAPI,NodeDef} from "node-red";
-import { MySQLServerNode, MySQLServerNodeDef } from './mysqlserverNode';
+import { IstateMonitor, MySQLServerNode, MySQLServerNodeDef } from './mysqlserverNode';
 
  interface MySQLQueryNodeOptions {
     host: string;
@@ -10,7 +10,7 @@ import { MySQLServerNode, MySQLServerNodeDef } from './mysqlserverNode';
     server:any;
 } 
  interface MySQLQueryNodeDef extends NodeDef, MySQLQueryNodeOptions {}
- class MySQLQueryNode  {
+ class MySQLQueryNode implements IstateMonitor{
     serverConfig: MySQLServerNode = undefined as unknown as MySQLServerNode;
       
     isAnObject(value:any):Boolean  {
@@ -43,6 +43,9 @@ import { MySQLServerNode, MySQLServerNodeDef } from './mysqlserverNode';
   constructor(private node:Node,private config:MySQLQueryNodeDef){}
   init():void{    
         this.red().log('Constructor called');
+        
+        this.serverConfig?.setStateMonitor(this);
+    
         this.red().on('input',  async ( msg:any) => {
       if (typeof(msg.topic) !== 'string' || !msg.topic) {
         this.red().error('msg.topic should be a string containing the SQL query.');
