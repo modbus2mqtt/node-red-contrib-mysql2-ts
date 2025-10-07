@@ -16,8 +16,8 @@
             ],
             "type": "node",
             "cwd": "/Users/volkmar/nodered",
-            "console": "integratedTerminal"
- 
+            "console": "integratedTerminal",
+            "preLaunchTask": "npm: build"
         },
         {
         "name": "Attach to Process (Pick)",

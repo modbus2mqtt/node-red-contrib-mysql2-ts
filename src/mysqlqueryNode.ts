@@ -1,6 +1,6 @@
 import mysql,{FieldPacket, OkPacket, Pool, ResultSetHeader, RowDataPacket} from 'mysql2/promise';
 import { Node, NodeAPI,NodeDef} from "node-red";
-import { MySQLServerNode } from './mysqlserverNode';
+import { MySQLServerNode, MySQLServerNodeDef } from './mysqlserverNode';
 
  interface MySQLQueryNodeOptions {
     host: string;
@@ -40,7 +40,8 @@ import { MySQLServerNode } from './mysqlserverNode';
       this.red().status({});
   }
 
-  constructor(private config:MySQLQueryNodeDef) {    
+  constructor(private node:Node,private config:MySQLQueryNodeDef){}
+  init():void{    
         this.red().log('Constructor called');
         this.red().on('input',  async ( msg:any) => {
       if (typeof(msg.topic) !== 'string' || !msg.topic) {
@@ -81,11 +82,14 @@ import { MySQLServerNode } from './mysqlserverNode';
       this.resetState();
     });
 
-    this.serverConfig.connect();
+    this.serverConfig.connect().catch( error => {
+        this.red().error(error);
+        this.setState('error', error.toString());
+    })
 
   }
     red():Node{
-        return this as unknown as Node;
+        return this.node as Node;
     }
     private processArray( msg:any):void{
      let values = [];
@@ -156,9 +160,17 @@ import { MySQLServerNode } from './mysqlserverNode';
 export = function(RED:NodeAPI){
 
   function MySQLQueryNodeCreate(this:Node, config:MySQLQueryNodeDef) {
-    let thisNode:MySQLQueryNode= new MySQLQueryNode(config)
-    RED.nodes.createNode(thisNode.red(), config);
-    thisNode.serverConfig = RED.nodes.getNode(config.server) as unknown as MySQLServerNode;
+    let thisNode:MySQLQueryNode= new MySQLQueryNode(this,config)
+    RED.nodes.createNode(this, config);
+    let server = RED.nodes.getNode(config.server);
+    thisNode.serverConfig = (server as any).mySQLServerNode as MySQLServerNode;
+    if(!thisNode.serverConfig){
+      thisNode.red().error("No MySQL-Server configured");
+      thisNode.red().log("No MySQL-Server configured");
+      
+      return;
+    }
+    thisNode.init()
   }
   RED.nodes.registerType(
         'MySQL-Query',

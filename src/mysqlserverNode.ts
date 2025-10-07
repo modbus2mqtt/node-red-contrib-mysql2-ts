@@ -6,8 +6,8 @@ import { Node, NodeAPI,NodeDef} from "node-red";
     port: number;
     database: string;
     tls: boolean;
- } 
- interface MySQLServerNodeDef extends NodeDef, MySQLServerNodeOptions {}
+  } 
+ export interface MySQLServerNodeDef extends NodeDef, MySQLServerNodeOptions {}
  interface MySQLServerNodeCredentials { user: string; password: string; }
  export class MySQLServerNode  {
    pool: Pool|null = null ;
@@ -24,7 +24,7 @@ import { Node, NodeAPI,NodeDef} from "node-red";
         clearTimeout(this.pingTimeout);
       }
       if(timeout!= undefined)
-        this.pingTimeout = setTimeout(this.ping, timeout * 1000);
+        this.pingTimeout = setTimeout(this.ping.bind(this), timeout * 1000);
     };
     ping():Promise<void>{
         return  new Promise( (resolve, reject) => {
@@ -35,7 +35,6 @@ import { Node, NodeAPI,NodeDef} from "node-red";
         }).catch( error => {
           this.red().emit('state', 'error',  error.toString());
           this.pingReset(5);
-          reject(error);
         });
         });
     };
@@ -78,7 +77,10 @@ import { Node, NodeAPI,NodeDef} from "node-red";
     })
     
 }
-   constructor(private config:MySQLServerNodeDef) {    
+   constructor(private node:Node,private config:MySQLServerNodeDef) {
+        (node as any).mySQLServerNode = this;
+    }
+   init():void{   
         this.red().log('Constructor called');
         this.red().on('close',  (done:()=>void) => {
                 if (this.pingTimeout) {
@@ -95,15 +97,16 @@ import { Node, NodeAPI,NodeDef} from "node-red";
     }
 
     red():Node<MySQLServerNodeCredentials>{
-        return this as unknown as Node<MySQLServerNodeCredentials>;
+        return this.node as unknown as Node<MySQLServerNodeCredentials>;
     }
 }
 
 export default function(RED:NodeAPI){
 
   function mySQLServerNodeCreate(this:Node<MySQLServerNodeCredentials>, config:MySQLServerNodeDef) {
-    let thisNode:MySQLServerNode= new MySQLServerNode(config)
-    RED.nodes.createNode(thisNode.red(), config);
+    let thisNode:MySQLServerNode= new MySQLServerNode(this,config)
+    RED.nodes.createNode(this, config);
+    thisNode.init()
   }
   RED.nodes.registerType(
         'MySQL-Server',

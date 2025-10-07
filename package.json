@@ -21,7 +21,8 @@
     },
   "node-red": {
     "nodes": {
-      "MySQL-Server": "dist/mysqlqueryNode.js"
+      "MySQL-Query": "dist/mysqlqueryNode.js",
+     "MySQL-Server": "dist/mysqlserverNode.js"
     }
   },
   "author": {
