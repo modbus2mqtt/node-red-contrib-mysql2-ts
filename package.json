@@ -16,7 +16,7 @@
     "mariadb"
   ],
   "scripts": {
-    "build": "cp src/*.html dist && tsc",
+    "build": "npx tsc && cp src/*.html dist",
     "watch": "tsc -w"
   },
   "node-red": {
