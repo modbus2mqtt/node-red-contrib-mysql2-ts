@@ -1,4 +1,4 @@
-# node-red-contrib-stackhero-mysql
+# node-red-contrib-mysql2-ts
 
 [Node-RED](https://nodered.org) node to read and write to a MySQL or a MariaDB database.
 
@@ -6,14 +6,14 @@ It uses TLS (SSL) encryption and is compatible with "Caching SHA2 password" auth
 
 **Remember: if you like it, please star it! 🥰**
 
-Official repository: [https://github.com/stackhero-io/node-red-contrib-stackhero-mysql](https://github.com/stackhero-io/node-red-contrib-stackhero-mysql)
+Official repository: [https://github.com/modbus2mqtt/node-red-contrib-mysql2-ts](https://github.com/modbus2mqtt/node-red-contrib-mysql2-ts)
 
-![Example of use](https://raw.githubusercontent.com/stackhero-io/node-red-contrib-stackhero-mysql/master/assets/screenshot.png)
+![Example of use](https://raw.githubusercontent.com/modbus2mqtt/node-red-contrib-mysql2-ts/master/assets/screenshot.png)
 
 
 ## Sponsors
 
-`node-red-contrib-stackhero-mysql` is developed by [Stackhero](https://www.stackhero.io/).
+`node-red-contrib-mysql2-ts` was created as a fork of `node-red-contrib-stackhero-mysql` which was developed by [Stackhero](https://www.stackhero.io/).
 If you are looking for powerful managed services, like Node-RED, MySQL or MariaDB, you should seriously consider Stackhero 🤓
 
 - [Managed MySQL databases](https://www.stackhero.io/services/MySQL)
@@ -64,6 +64,6 @@ You have to connect using TLS encryption. Simply check the box in this node conf
 
 ### Error "ER_NOT_SUPPORTED_AUTH_MODE: Client does not support authentication protocol requested by server; consider upgrading MySQL client"
 
-You are probably using another node than `node-red-contrib-stackhero-mysql` and tryin to connect to a MySQL >= 8 server using "Caching SHA2 password" authentication method.
+You are probably using another node than `node-red-contrib-mysql2-ts` and tryin to connect to a MySQL >= 8 server using "Caching SHA2 password" authentication method.
 
-To resolve that issue, simply use this node `node-red-contrib-stackhero-mysql`.
+To resolve that issue, simply use this node `node-red-contrib-mysql2-ts`.
