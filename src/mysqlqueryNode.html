@@ -1,0 +1,82 @@
+<script type="text/html" data-template-name="MySQL-Query">
+  <div class="form-row">
+    <label for="node-input-server"><i class="fa fa-database"></i> Database</label>
+    <input type="text" id="node-input-server">
+  </div>
+  <div class="form-row">
+    <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+    <input type="text" id="node-input-name" placeholder="Name">
+  </div>
+</script>
+
+<!-- See https://nodered.org/docs/creating-nodes/help-style-guide -->
+<script type="text/html" data-help-name="MySQL-Query">
+  <p>Connects to a MySQL database.</p>
+
+
+  <h3>Inputs</h3>
+  <dl class="message-properties">
+    <dt>
+      topic <span class="property-type">string</span>
+    </dt>
+    <dd> the SQL query.</dd>
+
+    <dt class="optional">
+      payload <span class="property-type">object</span>
+    </dt>
+    <dd> the arguments passed to the query.</dd>
+  </dl>
+
+
+  <h3>Outputs</h3>
+  <dl class="message-properties">
+    <dt>payload <span class="property-type">array</span></dt>
+    <dd>the results of the SQL query.</dd>
+  </dl>
+
+
+  <h3>Example</h3>
+
+  <p>
+    The query:
+    <pre>msg.topic = 'SELECT * FROM `users` WHERE `name` = :name AND `age` > :age;'</pre>
+
+    The arguments:
+    <pre>msg.payload = { name: 'Adrien', age: 30 };</pre>
+  </p>
+
+  <h3>References</h3>
+  <ul>
+    <li><a href="https://github.com/stackhero-io/node-red-contrib-mysql">Repository</a> - the node repository</li>
+    <li><a href="https://www.stackhero.io/services/MySQL">MySQL</a> - Managed MySQL database</li>
+    <li><a href="https://www.stackhero.io/services/MariaDB">MariaDB</a> - Managed MariaDB database</li>
+    <li><a href="https://www.stackhero.io/services/Node-RED">Node-RED</a> - Managed Node-RED service</li>
+  </ul>
+</script>
+
+<script type="text/javascript">
+  RED.nodes.registerType('MySQL-Query', {
+    category: 'Query',
+    color: '#C0DEED', // See https://nodered.org/docs/creating-nodes/appearance#background-colour
+    defaults: {
+      server: {
+        type: 'MySQL-Server',
+        required: true
+      },
+      name: {
+        value: ''
+      }
+    },
+    inputs: 1, // Number of input
+    outputs: 1, // Number of outputs
+    icon: 'db.png', // See https://nodered.org/docs/creating-nodes/appearance#icon
+    // Note: label (and probably labelStyle) have to be a classical function (not an arrow function)
+    label: function () {
+      const levelNode = RED.nodes.node(this.server);
+      return this.name || (levelNode ? levelNode.label() : 'MySQL');
+    },
+    labelStyle: function () {
+      return this.name ? 'node_label_italic' : ''
+    }
+  });
+</script>

@@ -1,0 +1,30 @@
+{
+    // Verwendet IntelliSense zum Ermitteln möglicher Attribute.
+    // Zeigen Sie auf vorhandene Attribute, um die zugehörigen Beschreibungen anzuzeigen.
+    // Weitere Informationen finden Sie unter https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Launch nodered via NPM",
+            "request": "launch",
+           "runtimeArgs": [
+                "/Users/volkmar/nodered/node_modules/.bin/node-red"
+            ],
+            "runtimeExecutable": "node",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "type": "node",
+            "cwd": "/Users/volkmar/nodered",
+            "console": "integratedTerminal",
+            "preLaunchTask": "npm: build"
+        },
+        {
+        "name": "Attach to Process (Pick)",
+        "type": "node",
+        "request": "attach",
+        "processId": "${command:PickProcess}",
+        "port": 9229,
+      }
+    ]
+}
