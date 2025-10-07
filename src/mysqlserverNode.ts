@@ -57,7 +57,7 @@ import { Node, NodeAPI,NodeDef} from "node-red";
           this.pingReset(); 
             resolve();
         }).catch( error => {
-          this.setState( 'error',  error.toString());
+          this.setState( 'error',  "Ping: " + error.toString());
           this.pingReset(5);
         });
         });
@@ -65,7 +65,7 @@ import { Node, NodeAPI,NodeDef} from "node-red";
 
   connect():Promise<void> {
     return new Promise( (resolve, reject) => {
-      this.setState('state', 'connecting');
+      this. setState('state', 'connecting');
 
       if (this.pool) {
         resolve();
