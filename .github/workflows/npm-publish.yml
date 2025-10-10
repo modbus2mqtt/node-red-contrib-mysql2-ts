@@ -4,10 +4,10 @@
 name: Node.js Package when released
 
 on:
-  release:
-    types: [created]
-  workflow_dispatch:
-  
+  push:
+    # Sequence of patterns matched against refs/tags
+    tags:
+      - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -25,6 +25,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # [!] we need to checkout with tags and commit history          
       - uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -34,3 +36,28 @@ jobs:
       - run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
+             with:
+          fetch-depth: 0 # [!] we need to checkout with tags and commit history
+
+      - name: 📋 Get Commits since last Release
+        id: changes
+        uses: simbo/changes-since-last-release-action@v1
+
+      - name: 📣 Output collected Data
+        run: |
+          echo "Changes since ${{ steps.changes.outputs.last-tag }}:"
+          echo "${{ steps.changes.outputs.log }}"
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@latest
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          body: |
+            Changes in this Release
+            ${{ steps.changes.outputs.log }}
+          draft: false
+          prerelease: false
+          
