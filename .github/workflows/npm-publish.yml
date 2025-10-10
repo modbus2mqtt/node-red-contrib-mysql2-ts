@@ -36,9 +36,6 @@ jobs:
       - run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
-             with:
-          fetch-depth: 0 # [!] we need to checkout with tags and commit history
-
       - name: 📋 Get Commits since last Release
         id: changes
         uses: simbo/changes-since-last-release-action@v1
