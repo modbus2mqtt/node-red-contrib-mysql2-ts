@@ -19,6 +19,8 @@ then
 else
   npm version patch
 fi
+git push
+git pull
 echo git add
 git add .
 version="$(node -p "require('./package.json').version")" 
