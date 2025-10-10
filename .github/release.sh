@@ -20,13 +20,12 @@ else
   npm version patch
 fi
 echo git add
-git add ./package.json
+git add .
 version="$(node -p "require('./package.json').version")" 
-echo git commit
 git commit -m "$version"
+git push
 git tag -a "$version" -m "Release $version")"   
 # Push changes and tags
-git push
 git push --tags
 
 echo "Release complete!"
