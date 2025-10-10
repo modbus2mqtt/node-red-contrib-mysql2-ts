@@ -21,11 +21,7 @@ else
 fi
 git push
 git pull
-echo git add
-git add .
 version="$(node -p "require('./package.json').version")" 
-echo git commit
-git commit -m "$version"
 echo git push
 git push
 echo git tag
