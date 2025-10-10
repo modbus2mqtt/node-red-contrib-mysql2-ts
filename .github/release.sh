@@ -9,7 +9,7 @@ git checkout main
 # Pull latest changes
 git pull
 
-# Install dependencies and run tests
+# Install dependencies and run tests 
 npm install
 npm run build
 npm test
