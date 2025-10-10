@@ -3,8 +3,8 @@ set -e
 
 # Release script for node-red-contrib-mysql2-ts
 
-# Ensure on main branch
-git checkout main
+# Ensure on master branch
+git checkout master
 
 # Pull latest changes
 git pull
@@ -13,10 +13,18 @@ git pull
 npm install
 npm run build
 npm test
-
-# Bump version (patch by default, change if needed)
-npm version patch
-git tag -a "v$(node -p "require('./package.json').version")" -m "Release v$(node -p "require('./package.json').version")"   
+if [ "$#" == 1 ]
+then
+  npm version  "$1"
+else
+  npm version patch
+fi
+echo git add
+git add ./package.json
+version="$(node -p "require('./package.json').version")" 
+echo git commit
+git commit -m "$version"
+git tag -a "$version" -m "Release $version")"   
 # Push changes and tags
 git push
 git push --tags
