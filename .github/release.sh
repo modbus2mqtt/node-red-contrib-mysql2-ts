@@ -10,7 +10,7 @@ git checkout master
 git pull
 
 # Install dependencies and run tests 
-npm install
+npm ci
 npm run build
 npm test
 if [ "$#" == 1 ]
