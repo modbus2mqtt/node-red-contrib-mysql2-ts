@@ -23,8 +23,9 @@ git push
 git pull
 version="$(node -p "require('./package.json').version")" 
 echo git push
+git tag
 git push
-echo git tag
+git tag
 git tag -a "v$version" -m "Release $version"   
 # Push changes and tags
 echo git push tag
